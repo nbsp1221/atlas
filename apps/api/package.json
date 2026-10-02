@@ -1,0 +1,42 @@
+{
+  "name": "api",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "tsx src/index.ts",
+    "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "bootstrap": "tsx src/bootstrap.ts",
+    "runtime:verify": "tsx test/runtime-verification.ts",
+    "activate-version": "tsx src/activate-automation-version.ts",
+    "finalize-integration-migration": "tsx src/finalize-integration-identity-migration.ts",
+    "test": "tsx --test test/**/*.test.ts",
+    "provision-owner": "tsx src/auth/provision-owner-cli.ts"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.19.5",
+    "@workspace/automation-runtime": "workspace:*",
+    "@workspace/automation-simulation": "workspace:*",
+    "@workspace/automations": "workspace:*",
+    "@workspace/db": "workspace:*",
+    "@workspace/domain": "workspace:*",
+    "@workspace/integrations": "workspace:*",
+    "better-auth": "1.7.7",
+    "drizzle-orm": "^0.45.2",
+    "hono": "^4.9.8",
+    "zod": "^4.6.5",
+    "tsx": "^4.20.6"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10",
+    "@types/node": "^24",
+    "eslint": "^10",
+    "globals": "^17",
+    "typescript": "~6",
+    "typescript-eslint": "^8"
+  }
+}

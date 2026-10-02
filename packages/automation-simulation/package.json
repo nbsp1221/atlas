@@ -1,0 +1,29 @@
+{
+  "name": "@workspace/automation-simulation",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "lint": "eslint .",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "typecheck": "tsc --noEmit",
+    "test": "tsx --test test/**/*.test.ts"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@workspace/automation-runtime": "workspace:*",
+    "@workspace/automations": "workspace:*",
+    "@workspace/domain": "workspace:*"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10",
+    "@types/node": "^24",
+    "eslint": "^10",
+    "globals": "^17",
+    "tsx": "^4.23.15",
+    "typescript": "~6",
+    "typescript-eslint": "^8"
+  }
+}

@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX "runs_test_event_idempotency_uq" ON "runs" USING btree ("automation_id","idempotency_key") WHERE "runs"."mode" = 'test' and "runs"."idempotency_key" is not null;

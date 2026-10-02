@@ -1,1 +1,0 @@
-export { toHeaderCase } from './toHeaderCase';

@@ -1,0 +1,2 @@
+ALTER TABLE "model_invocations" ADD COLUMN "connection_id" uuid;--> statement-breakpoint
+ALTER TABLE "model_invocations" ADD CONSTRAINT "model_invocations_connection_id_connections_id_fk" FOREIGN KEY ("connection_id") REFERENCES "public"."connections"("id") ON DELETE restrict ON UPDATE no action;

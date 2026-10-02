@@ -1,41 +1,30 @@
 {
-  "name": "fortune-assistant",
-  "version": "1.0.0",
-  "description": "",
-  "main": "packages/app/src/main.ts",
+  "name": "atlas",
+  "version": "0.0.1",
+  "private": true,
   "scripts": {
-    "start": "ts-node -r tsconfig-paths/register packages/app/src/main.ts"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/nbsp1221/fortune-assistant.git"
-  },
-  "author": "nbsp1221",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/nbsp1221/fortune-assistant/issues"
-  },
-  "homepage": "https://github.com/nbsp1221/fortune-assistant#readme",
-  "workspaces": [
-    "packages/app",
-    "packages/utils-http-client",
-    "packages/utils-scheduler",
-    "packages/utils-string"
-  ],
-  "dependencies": {
-    "axios": "0.21.1",
-    "change-case": "4.1.2",
-    "dotenv": "10.0.0",
-    "node-cron": "3.0.0"
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "format": "turbo format",
+    "typecheck": "turbo typecheck",
+    "test": "turbo test",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
+    "test:verification": "node --test scripts/test/*.test.mjs",
+    "verify:upgrade": "node scripts/verify-upgrade.mjs",
+    "verify": "node scripts/verify.mjs",
+    "verify:local": "node scripts/verify-local.mjs"
   },
   "devDependencies": {
-    "@types/node-cron": "2.0.4",
-    "@typescript-eslint/eslint-plugin": "4.29.0",
-    "@typescript-eslint/parser": "4.29.0",
-    "eslint": "7.32.0",
-    "eslint-config-retn0": "1.0.3",
-    "ts-node": "10.1.0",
-    "tsconfig-paths": "3.10.1",
-    "typescript": "4.3.5"
+    "prettier": "^3.9.6",
+    "prettier-plugin-tailwindcss": "^0.8.1",
+    "turbo": "^2.9.18",
+    "typescript": "~6"
+  },
+  "packageManager": "pnpm@10.33.4",
+  "engines": {
+    "node": "^22.22.1 || >=24"
   }
 }

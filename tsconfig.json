@@ -1,16 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "module": "commonjs",
-    "strict": true,
-    "esModuleInterop": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
-    "paths": {
-      "@fortune-assistant/utils-http-client": ["packages/utils-http-client/src/index.ts"],
-      "@fortune-assistant/utils-scheduler": ["packages/utils-scheduler/src/index.ts"],
-      "@fortune-assistant/utils-string": ["packages/utils-string/src/index.ts"]
-    }
+    "strict": true
   }
 }

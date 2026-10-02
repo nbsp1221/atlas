@@ -1,1 +1,55 @@
-/node_modules
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# env files
+.env*
+!.env.example
+
+# Playwright
+playwright-report/
+test-results/
+
+# turbo
+.turbo
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# typescript
+*.tsbuildinfo
+
+# Local verification evidence and operator material
+audit/
+.local/
+.cache/
+.pnpm-store/
+coverage/
+.ai-bridge/
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.dump
+*.backup
+*.bak
+*.sql.gz

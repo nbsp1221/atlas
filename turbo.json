@@ -1,0 +1,66 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build"],
+      "inputs": ["$TURBO_DEFAULT$", ".env*"],
+      "outputs": ["dist/**"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    },
+    "format": {
+      "dependsOn": ["^format"]
+    },
+    "typecheck": {
+      "dependsOn": ["^typecheck"]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "env": [
+        "DATABASE_URL",
+        "API_PORT",
+        "ATLAS_FAKE_MAILBOX_DIR",
+        "ATLAS_VERIFY_DATABASE_BASE_URL",
+        "ATLAS_VERIFY_POSTGRES_CONTAINER",
+        "ATLAS_AUTH_SECRET",
+        "ATLAS_PUBLIC_URL",
+        "ATLAS_TLS_KEY_FILE",
+        "ATLAS_TLS_CERT_FILE",
+        "ATLAS_WEB_DIST",
+        "ATLAS_CREDENTIAL_KEYS",
+        "ATLAS_CREDENTIAL_ACTIVE_KEY",
+        "ATLAS_TEST_OWNER_PASSWORD",
+        "ATLAS_TEST_STORAGE_STATE",
+        "ATLAS_LISTEN_HOST",
+        "ATLAS_CREDENTIAL_KEYS_FILE",
+        "ATLAS_DEV_ALLOWED_HOST"
+      ]
+    },
+    "test": {
+      "cache": false,
+      "env": [
+        "DATABASE_URL",
+        "VERIFICATION_RUN_ID",
+        "VERIFY_API_PORT",
+        "VERIFY_WEB_PORT",
+        "API_PORT",
+        "ATLAS_FAKE_MAILBOX_DIR",
+        "ATLAS_VERIFY_DATABASE_BASE_URL",
+        "ATLAS_VERIFY_POSTGRES_CONTAINER",
+        "ATLAS_AUTH_SECRET",
+        "ATLAS_PUBLIC_URL",
+        "ATLAS_TLS_KEY_FILE",
+        "ATLAS_TLS_CERT_FILE",
+        "ATLAS_WEB_DIST",
+        "ATLAS_CREDENTIAL_KEYS",
+        "ATLAS_CREDENTIAL_ACTIVE_KEY",
+        "ATLAS_TEST_OWNER_PASSWORD",
+        "ATLAS_TEST_STORAGE_STATE",
+        "PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH"
+      ]
+    }
+  }
+}

@@ -1,0 +1,938 @@
+{
+  "meta": {
+    "schema": "ERD-v2-fixture-simulation",
+    "note": "Conceptual row sets only. These are not seed data and do not imply a Drizzle schema."
+  },
+  "referenceRows": {
+    "automations": [
+      {
+        "id": "a_email",
+        "key": "email-triage",
+        "name": "Email Triage",
+        "status": "active",
+        "active_version_id": "av_email_v7"
+      },
+      {
+        "id": "a_purchase",
+        "key": "purchase-extraction",
+        "name": "Purchase Extraction",
+        "status": "active",
+        "active_version_id": "av_purchase_v1"
+      }
+    ],
+    "automation_versions": [
+      {
+        "id": "av_email_v7",
+        "automation_id": "a_email",
+        "version_number": 7,
+        "definition_schema_version": 1,
+        "definition_hash": "sha256:email-v7",
+        "source_revision": "git:email-v7",
+        "graph_definition": {
+          "nodes": [
+            "gmail_event",
+            "classify_email",
+            "archive_email",
+            "notify_user",
+            "report_spam",
+            "no_action",
+            "verify_archive",
+            "verify_delivery",
+            "verify_spam"
+          ],
+          "edges": [
+            "archive",
+            "notify",
+            "spam",
+            "no_action"
+          ]
+        }
+      },
+      {
+        "id": "av_email_v8",
+        "automation_id": "a_email",
+        "version_number": 8,
+        "definition_schema_version": 1,
+        "definition_hash": "sha256:email-v8-alt-model",
+        "source_revision": "git:email-v8",
+        "graph_definition": {
+          "nodes": [
+            "gmail_event",
+            "classify_email",
+            "archive_email",
+            "notify_user",
+            "report_spam",
+            "no_action",
+            "verify_archive",
+            "verify_delivery",
+            "verify_spam"
+          ],
+          "edges": [
+            "archive",
+            "notify",
+            "spam",
+            "no_action"
+          ],
+          "change": "classify_email model changed"
+        }
+      },
+      {
+        "id": "av_purchase_v1",
+        "automation_id": "a_purchase",
+        "version_number": 1,
+        "definition_schema_version": 1,
+        "definition_hash": "sha256:purchase-v1",
+        "source_revision": "git:purchase-v1",
+        "graph_definition": {
+          "nodes": [
+            "purchase_input",
+            "extract_purchase",
+            "write_purchase_fact"
+          ],
+          "edges": [
+            "success"
+          ]
+        }
+      }
+    ],
+    "connections": [
+      {
+        "id": "c_gmail",
+        "key": "gmail-primary",
+        "provider": "gmail",
+        "label": "Primary Gmail",
+        "status": "active",
+        "last_check_status": "healthy",
+        "config": {
+          "account_subject": "google-account-stable-id"
+        },
+        "credential_ref": "secret:gmail-primary"
+      },
+      {
+        "id": "c_telegram",
+        "key": "telegram-personal",
+        "provider": "telegram",
+        "label": "Personal Telegram",
+        "status": "active",
+        "last_check_status": "healthy",
+        "config": {
+          "chat_id_ref": "personal-chat"
+        },
+        "credential_ref": "secret:telegram-personal"
+      }
+    ]
+  },
+  "scenarios": [
+    {
+      "id": "S1_notify_verified",
+      "purpose": "Toss reply -> notify -> verified",
+      "runs": [
+        {
+          "id": "r_toss",
+          "automation_id": "a_email",
+          "automation_version_id": "av_email_v7",
+          "mode": "live",
+          "status": "succeeded",
+          "trigger_connection_id": "c_gmail",
+          "idempotency_key": "gmail:c_gmail:m_toss",
+          "parent_node_execution_id": null,
+          "replay_of_run_id": null,
+          "trigger_snapshot": {
+            "provider_message_id": "m_toss"
+          },
+          "input_snapshot": {
+            "subject": "Open API 문의에 답변드립니다",
+            "body": "..."
+          },
+          "output_snapshot": {
+            "route": "notify"
+          }
+        }
+      ],
+      "node_executions": [
+        {
+          "id": "ne_toss_1",
+          "run_id": "r_toss",
+          "sequence": 1,
+          "retry_of_node_execution_id": null,
+          "node_key": "gmail_event",
+          "node_kind": "trigger",
+          "status": "succeeded"
+        },
+        {
+          "id": "ne_toss_2",
+          "run_id": "r_toss",
+          "sequence": 2,
+          "retry_of_node_execution_id": null,
+          "node_key": "classify_email",
+          "node_kind": "decision",
+          "status": "succeeded",
+          "selected_edge_key": "notify",
+          "model_provider": "provider-x",
+          "model": "Jev",
+          "model_parameters": {
+            "temperature": 0
+          },
+          "usage_details": {
+            "input": 1281,
+            "output": 14
+          },
+          "cost_details": {
+            "total_usd": 0.000021
+          },
+          "cost_usd": "0.000021000000",
+          "duration_ms": 174,
+          "output_snapshot": {
+            "route": "notify"
+          }
+        },
+        {
+          "id": "ne_toss_3",
+          "run_id": "r_toss",
+          "sequence": 3,
+          "retry_of_node_execution_id": null,
+          "node_key": "notify_user",
+          "node_kind": "action",
+          "status": "succeeded"
+        },
+        {
+          "id": "ne_toss_4",
+          "run_id": "r_toss",
+          "sequence": 4,
+          "retry_of_node_execution_id": null,
+          "node_key": "verify_delivery",
+          "node_kind": "verify",
+          "status": "succeeded",
+          "output_snapshot": {
+            "result": "verified"
+          }
+        }
+      ],
+      "action_executions": [
+        {
+          "id": "ae_toss",
+          "node_execution_id": "ne_toss_3",
+          "connection_id": "c_telegram",
+          "kind": "telegram.notify",
+          "idempotency_key": "r_toss:notify_user:0",
+          "execution_status": "succeeded",
+          "verification_status": "verified",
+          "verified_by_node_execution_id": "ne_toss_4",
+          "external_ref": "telegram:823410",
+          "request_snapshot": {
+            "redacted": true
+          },
+          "response_snapshot": {
+            "message_id": 823410
+          },
+          "verification_evidence": {
+            "message_id": 823410
+          },
+          "started_at": "2026-09-29T02:42:15+09:00",
+          "finished_at": "2026-09-29T02:42:15+09:00",
+          "verified_at": "2026-09-29T02:42:15+09:00"
+        }
+      ],
+      "node_feedback": []
+    },
+    {
+      "id": "S2_archive_verified",
+      "purpose": "Dependabot -> archive -> verified",
+      "runs": [
+        {
+          "id": "r_github",
+          "automation_id": "a_email",
+          "automation_version_id": "av_email_v7",
+          "mode": "live",
+          "status": "succeeded",
+          "trigger_connection_id": "c_gmail",
+          "idempotency_key": "gmail:c_gmail:m_github",
+          "parent_node_execution_id": null,
+          "replay_of_run_id": null,
+          "trigger_snapshot": {
+            "provider_message_id": "m_github"
+          },
+          "input_snapshot": {
+            "subject": "[GitHub] Dependabot alert"
+          },
+          "output_snapshot": {
+            "route": "archive"
+          }
+        }
+      ],
+      "node_executions": [
+        {
+          "id": "ne_gh_1",
+          "run_id": "r_github",
+          "sequence": 1,
+          "retry_of_node_execution_id": null,
+          "node_key": "gmail_event",
+          "node_kind": "trigger",
+          "status": "succeeded"
+        },
+        {
+          "id": "ne_gh_2",
+          "run_id": "r_github",
+          "sequence": 2,
+          "retry_of_node_execution_id": null,
+          "node_key": "classify_email",
+          "node_kind": "decision",
+          "status": "succeeded",
+          "selected_edge_key": "archive",
+          "model_provider": "provider-x",
+          "model": "Jev",
+          "usage_details": {
+            "input": 820,
+            "output": 12
+          },
+          "cost_usd": "0.000014000000"
+        },
+        {
+          "id": "ne_gh_3",
+          "run_id": "r_github",
+          "sequence": 3,
+          "retry_of_node_execution_id": null,
+          "node_key": "archive_email",
+          "node_kind": "action",
+          "status": "succeeded"
+        },
+        {
+          "id": "ne_gh_4",
+          "run_id": "r_github",
+          "sequence": 4,
+          "retry_of_node_execution_id": null,
+          "node_key": "verify_archive",
+          "node_kind": "verify",
+          "status": "succeeded",
+          "output_snapshot": {
+            "inbox_label_present": false
+          }
+        }
+      ],
+      "action_executions": [
+        {
+          "id": "ae_gh",
+          "node_execution_id": "ne_gh_3",
+          "connection_id": "c_gmail",
+          "kind": "gmail.archive",
+          "idempotency_key": "r_github:archive_email:0",
+          "execution_status": "succeeded",
+          "verification_status": "verified",
+          "verified_by_node_execution_id": "ne_gh_4",
+          "external_ref": "gmail:m_github",
+          "request_snapshot": {
+            "provider_message_id": "m_github"
+          },
+          "response_snapshot": {
+            "ok": true
+          },
+          "verification_evidence": {
+            "inbox_label_present": false
+          },
+          "started_at": "2026-09-29T02:38:10+09:00",
+          "finished_at": "2026-09-29T02:38:10+09:00",
+          "verified_at": "2026-09-29T02:38:10+09:00"
+        }
+      ],
+      "node_feedback": []
+    },
+    {
+      "id": "S3_notify_unverified",
+      "purpose": "Invoice -> notify succeeds, delivery cannot be independently verified",
+      "runs": [
+        {
+          "id": "r_cloudflare",
+          "automation_id": "a_email",
+          "automation_version_id": "av_email_v7",
+          "mode": "live",
+          "status": "succeeded",
+          "trigger_connection_id": "c_gmail",
+          "idempotency_key": "gmail:c_gmail:m_cf",
+          "parent_node_execution_id": null,
+          "replay_of_run_id": null,
+          "trigger_snapshot": {
+            "provider_message_id": "m_cf"
+          },
+          "input_snapshot": {
+            "subject": "Invoice #38291"
+          },
+          "output_snapshot": {
+            "route": "notify"
+          }
+        }
+      ],
+      "node_executions": [
+        {
+          "id": "ne_cf_1",
+          "run_id": "r_cloudflare",
+          "sequence": 1,
+          "retry_of_node_execution_id": null,
+          "node_key": "gmail_event",
+          "node_kind": "trigger",
+          "status": "succeeded"
+        },
+        {
+          "id": "ne_cf_2",
+          "run_id": "r_cloudflare",
+          "sequence": 2,
+          "retry_of_node_execution_id": null,
+          "node_key": "classify_email",
+          "node_kind": "decision",
+          "status": "succeeded",
+          "selected_edge_key": "notify",
+          "model_provider": "provider-x",
+          "model": "Jev",
+          "usage_details": {
+            "input": 944,
+            "output": 14
+          },
+          "cost_usd": "0.000018000000"
+        },
+        {
+          "id": "ne_cf_3",
+          "run_id": "r_cloudflare",
+          "sequence": 3,
+          "retry_of_node_execution_id": null,
+          "node_key": "notify_user",
+          "node_kind": "action",
+          "status": "succeeded"
+        },
+        {
+          "id": "ne_cf_4",
+          "run_id": "r_cloudflare",
+          "sequence": 4,
+          "retry_of_node_execution_id": null,
+          "node_key": "verify_delivery",
+          "node_kind": "verify",
+          "status": "succeeded",
+          "output_snapshot": {
+            "result": "unverified",
+            "reason": "provider_has_no_independent_delivery_signal"
+          }
+        }
+      ],
+      "action_executions": [
+        {
+          "id": "ae_cf",
+          "node_execution_id": "ne_cf_3",
+          "connection_id": "c_telegram",
+          "kind": "telegram.notify",
+          "idempotency_key": "r_cloudflare:notify_user:0",
+          "execution_status": "succeeded",
+          "verification_status": "unverified",
+          "verified_by_node_execution_id": "ne_cf_4",
+          "external_ref": "telegram:823411",
+          "request_snapshot": {
+            "redacted": true
+          },
+          "response_snapshot": {
+            "message_id": 823411
+          },
+          "verification_evidence": {
+            "reason": "no_independent_delivery_signal"
+          },
+          "started_at": "2026-09-29T02:31:05+09:00",
+          "finished_at": "2026-09-29T02:31:05+09:00",
+          "verified_at": "2026-09-29T02:31:05+09:00"
+        }
+      ],
+      "node_feedback": []
+    },
+    {
+      "id": "S4_archive_verified",
+      "purpose": "Newsletter -> archive -> verified",
+      "runs": [
+        {
+          "id": "r_news",
+          "automation_id": "a_email",
+          "automation_version_id": "av_email_v7",
+          "mode": "live",
+          "status": "succeeded",
+          "trigger_connection_id": "c_gmail",
+          "idempotency_key": "gmail:c_gmail:m_news",
+          "parent_node_execution_id": null,
+          "replay_of_run_id": null,
+          "trigger_snapshot": {
+            "provider_message_id": "m_news"
+          },
+          "input_snapshot": {
+            "subject": "Weekly AI Digest"
+          },
+          "output_snapshot": {
+            "route": "archive"
+          }
+        }
+      ],
+      "node_executions": [
+        {
+          "id": "ne_news_1",
+          "run_id": "r_news",
+          "sequence": 1,
+          "retry_of_node_execution_id": null,
+          "node_key": "gmail_event",
+          "node_kind": "trigger",
+          "status": "succeeded"
+        },
+        {
+          "id": "ne_news_2",
+          "run_id": "r_news",
+          "sequence": 2,
+          "retry_of_node_execution_id": null,
+          "node_key": "classify_email",
+          "node_kind": "decision",
+          "status": "succeeded",
+          "selected_edge_key": "archive",
+          "model_provider": "provider-x",
+          "model": "Jev",
+          "usage_details": {
+            "input": 760,
+            "output": 11
+          },
+          "cost_usd": "0.000012000000"
+        },
+        {
+          "id": "ne_news_3",
+          "run_id": "r_news",
+          "sequence": 3,
+          "retry_of_node_execution_id": null,
+          "node_key": "archive_email",
+          "node_kind": "action",
+          "status": "succeeded"
+        },
+        {
+          "id": "ne_news_4",
+          "run_id": "r_news",
+          "sequence": 4,
+          "retry_of_node_execution_id": null,
+          "node_key": "verify_archive",
+          "node_kind": "verify",
+          "status": "succeeded"
+        }
+      ],
+      "action_executions": [
+        {
+          "id": "ae_news",
+          "node_execution_id": "ne_news_3",
+          "connection_id": "c_gmail",
+          "kind": "gmail.archive",
+          "idempotency_key": "r_news:archive_email:0",
+          "execution_status": "succeeded",
+          "verification_status": "verified",
+          "verified_by_node_execution_id": "ne_news_4",
+          "external_ref": "gmail:m_news",
+          "started_at": "2026-09-29T02:17:46+09:00",
+          "finished_at": "2026-09-29T02:17:46+09:00",
+          "verified_at": "2026-09-29T02:17:46+09:00"
+        }
+      ],
+      "node_feedback": []
+    },
+    {
+      "id": "S5_no_action",
+      "purpose": "Personal email -> no_action",
+      "runs": [
+        {
+          "id": "r_personal",
+          "automation_id": "a_email",
+          "automation_version_id": "av_email_v7",
+          "mode": "live",
+          "status": "succeeded",
+          "trigger_connection_id": "c_gmail",
+          "idempotency_key": "gmail:c_gmail:m_personal",
+          "parent_node_execution_id": null,
+          "replay_of_run_id": null,
+          "trigger_snapshot": {
+            "provider_message_id": "m_personal"
+          },
+          "input_snapshot": {
+            "subject": "Lunch next week?"
+          },
+          "output_snapshot": {
+            "route": "no_action"
+          }
+        }
+      ],
+      "node_executions": [
+        {
+          "id": "ne_personal_1",
+          "run_id": "r_personal",
+          "sequence": 1,
+          "retry_of_node_execution_id": null,
+          "node_key": "gmail_event",
+          "node_kind": "trigger",
+          "status": "succeeded"
+        },
+        {
+          "id": "ne_personal_2",
+          "run_id": "r_personal",
+          "sequence": 2,
+          "retry_of_node_execution_id": null,
+          "node_key": "classify_email",
+          "node_kind": "decision",
+          "status": "succeeded",
+          "selected_edge_key": "no_action",
+          "model_provider": "provider-x",
+          "model": "Jev",
+          "usage_details": {
+            "input": 602,
+            "output": 13
+          },
+          "cost_usd": "0.000009000000"
+        },
+        {
+          "id": "ne_personal_3",
+          "run_id": "r_personal",
+          "sequence": 3,
+          "retry_of_node_execution_id": null,
+          "node_key": "no_action",
+          "node_kind": "terminal",
+          "status": "succeeded"
+        }
+      ],
+      "action_executions": [],
+      "node_feedback": []
+    },
+    {
+      "id": "S6_duplicate_trigger",
+      "purpose": "Same Gmail message delivered twice",
+      "persisted": "no second run",
+      "attempted_run": {
+        "id": "r_github_duplicate",
+        "automation_id": "a_email",
+        "automation_version_id": "av_email_v7",
+        "mode": "live",
+        "idempotency_key": "gmail:c_gmail:m_github"
+      },
+      "expected_constraint": "reject because (automation_id, idempotency_key) duplicates r_github"
+    },
+    {
+      "id": "S7_crash_after_external_send",
+      "purpose": "Telegram may have sent, worker dies before result is durably finalized",
+      "runs": [
+        {
+          "id": "r_crash",
+          "automation_id": "a_email",
+          "automation_version_id": "av_email_v7",
+          "mode": "live",
+          "status": "failed",
+          "trigger_connection_id": "c_gmail",
+          "idempotency_key": "gmail:c_gmail:m_crash",
+          "parent_node_execution_id": null,
+          "replay_of_run_id": null,
+          "trigger_snapshot": {
+            "provider_message_id": "m_crash"
+          },
+          "input_snapshot": {
+            "subject": "Important reply"
+          },
+          "error": {
+            "code": "worker_lost"
+          }
+        }
+      ],
+      "node_executions": [
+        {
+          "id": "ne_crash_1",
+          "run_id": "r_crash",
+          "sequence": 1,
+          "retry_of_node_execution_id": null,
+          "node_key": "gmail_event",
+          "node_kind": "trigger",
+          "status": "succeeded"
+        },
+        {
+          "id": "ne_crash_2",
+          "run_id": "r_crash",
+          "sequence": 2,
+          "retry_of_node_execution_id": null,
+          "node_key": "classify_email",
+          "node_kind": "decision",
+          "status": "succeeded",
+          "selected_edge_key": "notify",
+          "model_provider": "provider-x",
+          "model": "Jev",
+          "usage_details": {
+            "input": 700,
+            "output": 12
+          }
+        },
+        {
+          "id": "ne_crash_3",
+          "run_id": "r_crash",
+          "sequence": 3,
+          "retry_of_node_execution_id": null,
+          "node_key": "notify_user",
+          "node_kind": "action",
+          "status": "failed",
+          "error": {
+            "code": "worker_lost_after_io_boundary"
+          }
+        }
+      ],
+      "action_executions": [
+        {
+          "id": "ae_crash",
+          "node_execution_id": "ne_crash_3",
+          "connection_id": "c_telegram",
+          "kind": "telegram.notify",
+          "idempotency_key": "r_crash:notify_user:0",
+          "execution_status": "unknown",
+          "verification_status": "pending",
+          "verified_by_node_execution_id": null,
+          "external_ref": null,
+          "request_snapshot": {
+            "redacted": true
+          },
+          "response_snapshot": null,
+          "verification_evidence": null,
+          "started_at": "2026-09-29T03:00:00+09:00",
+          "finished_at": null,
+          "verified_at": null
+        }
+      ],
+      "recovery_policy": "claim existing action by idempotency key; do not blindly resend when provider cannot guarantee idempotency; reconcile or surface attention"
+    },
+    {
+      "id": "S8_classifier_retry",
+      "purpose": "Classifier gets 429 and succeeds on retry",
+      "runs": [
+        {
+          "id": "r_retry",
+          "automation_id": "a_email",
+          "automation_version_id": "av_email_v7",
+          "mode": "live",
+          "status": "succeeded",
+          "trigger_connection_id": "c_gmail",
+          "idempotency_key": "gmail:c_gmail:m_retry",
+          "parent_node_execution_id": null,
+          "replay_of_run_id": null,
+          "trigger_snapshot": {
+            "provider_message_id": "m_retry"
+          },
+          "input_snapshot": {
+            "subject": "Retry case"
+          },
+          "output_snapshot": {
+            "route": "archive"
+          }
+        }
+      ],
+      "node_executions": [
+        {
+          "id": "ne_retry_1",
+          "run_id": "r_retry",
+          "sequence": 1,
+          "retry_of_node_execution_id": null,
+          "node_key": "gmail_event",
+          "node_kind": "trigger",
+          "status": "succeeded"
+        },
+        {
+          "id": "ne_retry_2",
+          "run_id": "r_retry",
+          "sequence": 2,
+          "retry_of_node_execution_id": null,
+          "node_key": "classify_email",
+          "node_kind": "decision",
+          "status": "failed",
+          "model_provider": "provider-x",
+          "model": "Jev",
+          "provider_request_id": "req-429",
+          "usage_details": null,
+          "cost_details": null,
+          "cost_usd": null,
+          "duration_ms": 83,
+          "error": {
+            "http_status": 429
+          }
+        },
+        {
+          "id": "ne_retry_3",
+          "run_id": "r_retry",
+          "sequence": 3,
+          "retry_of_node_execution_id": "ne_retry_2",
+          "node_key": "classify_email",
+          "node_kind": "decision",
+          "status": "succeeded",
+          "selected_edge_key": "archive",
+          "model_provider": "provider-x",
+          "model": "Jev",
+          "provider_request_id": "req-ok",
+          "usage_details": {
+            "input": 901,
+            "output": 12
+          },
+          "cost_usd": "0.000015000000",
+          "duration_ms": 190,
+          "output_snapshot": {
+            "route": "archive"
+          }
+        }
+      ],
+      "finding": "retry_of_node_execution_id is needed to distinguish a retry from a later loop/re-entry of the same node_key"
+    },
+    {
+      "id": "S9_replay_alt_model",
+      "purpose": "Replay Toss input on Email Triage v8 with another model; no real external side effects",
+      "runs": [
+        {
+          "id": "r_toss_replay_v8",
+          "automation_id": "a_email",
+          "automation_version_id": "av_email_v8",
+          "mode": "replay",
+          "status": "succeeded",
+          "trigger_connection_id": null,
+          "idempotency_key": null,
+          "parent_node_execution_id": null,
+          "replay_of_run_id": "r_toss",
+          "trigger_snapshot": null,
+          "input_snapshot": {
+            "subject": "Open API 문의에 답변드립니다",
+            "body": "..."
+          },
+          "output_snapshot": {
+            "route": "archive"
+          }
+        }
+      ],
+      "node_executions": [
+        {
+          "id": "ne_replay_1",
+          "run_id": "r_toss_replay_v8",
+          "sequence": 1,
+          "retry_of_node_execution_id": null,
+          "node_key": "classify_email",
+          "node_kind": "decision",
+          "status": "succeeded",
+          "selected_edge_key": "archive",
+          "model_provider": "provider-y",
+          "model": "AlternativeModel",
+          "model_parameters": {
+            "temperature": 0
+          },
+          "usage_details": {
+            "input": 1281,
+            "cached_input": 900,
+            "output": 10,
+            "reasoning": 31
+          },
+          "cost_details": {
+            "total_usd": 0.00003
+          },
+          "cost_usd": "0.000030000000",
+          "duration_ms": 240,
+          "output_snapshot": {
+            "route": "archive"
+          }
+        },
+        {
+          "id": "ne_replay_2",
+          "run_id": "r_toss_replay_v8",
+          "sequence": 2,
+          "retry_of_node_execution_id": null,
+          "node_key": "archive_email",
+          "node_kind": "action",
+          "status": "skipped",
+          "output_snapshot": {
+            "reason": "replay_side_effect_suppressed"
+          }
+        }
+      ],
+      "action_executions": [],
+      "node_feedback": []
+    },
+    {
+      "id": "S10_incorrect_feedback",
+      "purpose": "Human marks original classifier result wrong",
+      "runs": [],
+      "node_executions": [],
+      "action_executions": [],
+      "node_feedback": [
+        {
+          "id": "nf_toss",
+          "node_execution_id": "ne_toss_2",
+          "verdict": "incorrect",
+          "expected_output": {
+            "route": "archive"
+          },
+          "note": "This is useful but not urgent; archive instead of notify.",
+          "created_at": "2026-09-29T10:00:00+09:00"
+        }
+      ],
+      "comparison": "r_toss_replay_v8 can now be evaluated against expected_output on ne_toss_2"
+    },
+    {
+      "id": "S11_child_automation",
+      "purpose": "Email Triage classifies purchase and invokes Purchase Extraction as a child automation",
+      "parent_run": {
+        "id": "r_purchase_mail",
+        "automation_id": "a_email",
+        "automation_version_id": "av_email_v7",
+        "mode": "live",
+        "status": "succeeded",
+        "trigger_connection_id": "c_gmail",
+        "idempotency_key": "gmail:c_gmail:m_purchase",
+        "parent_node_execution_id": null,
+        "replay_of_run_id": null,
+        "trigger_snapshot": {
+          "provider_message_id": "m_purchase"
+        },
+        "input_snapshot": {
+          "subject": "Your receipt"
+        },
+        "output_snapshot": {
+          "route": "purchase"
+        }
+      },
+      "parent_node_executions": [
+        {
+          "id": "ne_purchase_mail_1",
+          "run_id": "r_purchase_mail",
+          "sequence": 1,
+          "retry_of_node_execution_id": null,
+          "node_key": "classify_email",
+          "node_kind": "decision",
+          "status": "succeeded",
+          "selected_edge_key": "purchase"
+        },
+        {
+          "id": "ne_purchase_mail_2",
+          "run_id": "r_purchase_mail",
+          "sequence": 2,
+          "retry_of_node_execution_id": null,
+          "node_key": "invoke_purchase_extraction",
+          "node_kind": "action",
+          "status": "succeeded",
+          "output_snapshot": {
+            "child_run_id": "r_purchase_child"
+          }
+        }
+      ],
+      "child_run": {
+        "id": "r_purchase_child",
+        "automation_id": "a_purchase",
+        "automation_version_id": "av_purchase_v1",
+        "mode": "live",
+        "status": "succeeded",
+        "trigger_connection_id": null,
+        "idempotency_key": "child:ne_purchase_mail_2:a_purchase",
+        "parent_node_execution_id": "ne_purchase_mail_2",
+        "replay_of_run_id": null,
+        "trigger_snapshot": {
+          "source": "parent_node_execution",
+          "parent_node_execution_id": "ne_purchase_mail_2"
+        },
+        "input_snapshot": {
+          "email_run_id": "r_purchase_mail",
+          "subject": "Your receipt"
+        },
+        "output_snapshot": {
+          "merchant": "Example Store",
+          "amount": "20.00",
+          "currency": "USD"
+        }
+      },
+      "finding": "parent_node_execution_id is more precise than parent_run_id because it identifies the exact node that spawned the child"
+    }
+  ]
+}
